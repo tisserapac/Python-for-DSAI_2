@@ -1,0 +1,15 @@
+For Mobile Phone data set under Multivariate analysis, for discrete features I plot the box-plots. May I please know, from a box-plothow can we identify whether it is a good feature to use in our model training?
+
+look at the mean of the box. 
+Actually, the box plot and scatter plot is kind of the same. When you plot the scatter you want to see some trend. Box plot is the same.
+
+
+The confuse is value of the box might not arrange in any order. You may need to arrange manually.
+
+Anyhow, we want to see the differences between each values. For example, is 3 bathroom usually cost more than 1 bathroom.
+But here you know 3 is more than 1.
+
+How about, color of a car. Is white more expensive than red?
+
+The box has 1 stripe which is a mean of the data in the value. If white is more expensive then red then we the strip of white will be higher than red.
+
