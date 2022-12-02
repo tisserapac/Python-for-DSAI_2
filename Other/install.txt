@@ -1,0 +1,13 @@
+pipenv install
+
+# Install library
+pipenv install ipykernel
+pipenv install numpy
+pipenv install pandas
+pipenv install matplotlib
+pipenv install seaborn
+pipenv install sklearn
+pipenv install torch
+pipenv install Pillow
+pipenv install shap
+pipenv install mne

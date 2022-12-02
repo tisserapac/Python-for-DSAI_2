@@ -1,0 +1,9 @@
+Be more scientific
+
+Label encoding vs. One-hot
+-Use label encoding when there are too many categories, like 30 or 50
+-When you use one-hot encoding, before you use may be you can think about grouping them to make less cats
+
+- State hypothesis
+- State research question
+- Discuss and interpretation 

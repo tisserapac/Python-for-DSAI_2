@@ -1,0 +1,392 @@
+imports
+#Imports
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+1. ETL
+Load the data and preview
+df.head()
+print(f"Dataframe shape: {df.shape}\n")
+print(f"Columns: {df.columns}\n")
+
+Hypothesis:
+===========
+    
+1. Ingredients and this fake 'review' predicts rating
+2. Cocoa_percent, bean_origin may be interesting...
+============
+
+2.EDA
+
+
+
+2.0.1 Rename cols if needed
+
+df.info()
+df.describe()
+
+df = df.rename(
+    columns = {'Battery capacity (mAh)': 'battery_cap',
+               'Screen size (inches)' : 'screen_size',
+               'Resolution x' : 'res_x'}
+)
+
+2.0.2 Drop columns
+df.drop('Unnamed: 0', inplace=True, axis=1)
+
+# Drop column 'sex'
+new_df = new_df.drop(['sex'],axis=1)
+
+df = df.drop(columns = ['manufacturer', 'year_reviewed',
+                        'bar_name'])
+
+Delete columns ===>
+#df.drop() - Drop the whole column
+#We need only to remove column names
+cols = np.delete(cols, np.where(cols=='Status'))
+
+Check if y has missing values if so delete those rows
+
+# Dropping rows where many of the columns have NaN
+c1 = df['culmen_length_mm'].isnull()
+c2 = df['culmen_depth_mm'].isnull()
+many_null = np.where(c1 & c2)
+print (many_null)
+df.iloc[many_null[0], :]
+df.drop(many_null[0], axis = 0, inplace=True)
+print('Data shape', df.shape)
+print('Missing values:\n------------------------\n', df.isnull().sum())
+
+#Dropping outliers
+np.where(df['Rent'] > 1000000)
+df.iloc[1001]
+df.drop([1001, 1837], axis = 0, inplace=True)
+
+
+sns.pairplot(df)
+plt.show()
+
+2.1 Univariate analysis
+- countplot - discreate
+- distplot - continuous
+- df['cocoa_percent'].describe()
+
+To check number of unique values
+
+n = len(pd.unique(df['Unnamed: 0']))
+print(f"Number of unique valus in column 'Unnamed: 0' {n}")
+
+for col in cols:
+    n  = len(pd.unique(df[col]))
+    print(f"Number of unique valus in column {col} - {n}") 
+
+df['Status'].unique()
+
+#1. countplot is to plot the discrete x_1 or y
+sns.countplot(data = df, x="Status")
+
+#2. distplot or displt is to plot the continuous x_1 or y
+sns.displot(df.Alcohol)
+
+#discrete column
+dis_col = df.select_dtypes(include=['object']).columns
+#continuous column
+cont_col = df.select_dtypes(include=['int64', 'float64']).columns
+cont_col = ['battery_cap', 'screen_size','res_x', 'res_y', 'int_storage', 'rear_cam', 'front_cam']
+
+
+for col in cont_col:
+    sns.displot(data=df, x=col)
+    plt.show()
+
+for col in dis_col:
+    sns.countplot(data = df, x=col)
+    plt.show()
+
+2.1 Multivariate analysis
+
+2.2.1 If y is discrete check form imbalance data
+For discrete variables, 
+df['stroke'].value_counts()
+
+
+To check for a condition
+np.where(df['int_storage'] > 256)
+
+To check a location
+df.iloc[651]
+
+Y discrete
+===========
+for col in dis_col:
+    sns.barplot(x = df['stroke'], y = df[col])
+    plt.show()
+
+for col in discrete_cols:
+    sns.barplot(x = new_df[col], y = new_df['species'], estimator = np.mean)
+    plt.show()
+
+con_col = con_col.drop('stroke')
+con_col
+
+for col in con_col:
+    sns.barplot(x = df['stroke'], y = df[col])
+    plt.show()
+
+for col in dis_col:
+    plt.figure(figsize=(10, 10))
+    plt.xticks(rotation=90)
+    sns.boxplot(x = df[col], y=df['rating'])
+    plt.show()
+
+
+Y Continuos
+============
+for col in dis_col:
+    sns.boxplot(x = df[col], y=df['Price'])
+    plt.show()
+
+for col in cont_col:
+    sns.scatterplot(x = df[col], y=df['Price'])
+    plt.show()
+
+sns.scatterplot(x = df['Size'], y = df['Rent'])
+sns.boxplot(x = df['City'], y = df['Rent'])
+
+Heatmap
+plt.figure(figsize=(10, 5))
+sns.heatmap(df.corr(), annot=True)
+
+Pivot and new column
+firstpivot = df['Size'].median() - df['Size'].std()
+secondpivot = df['Size'].median() + df['Size'].std()
+# G1 - < 218.7653
+cond1 = df.Size < firstpivot # List of True, False, can use to select index
+
+# G2 218.7653 to 1481.2346
+cond2  = (df.Size >= firstpivot) & (df.Size <= secondpivot)
+
+# G3 > 1481.2346
+cond3 = df.Size > secondpivot
+
+df['cat_size'] = 1 # Set everything to 1
+
+df.loc[cond1, 'cat_size'] = 1
+df.loc[cond2, 'cat_size'] = 2
+df.loc[cond3, 'cat_size'] = 3
+
+3. Feature selection/extraction
+
+ - Transform data using label encoder and get_dummy first
+new_df = pd.get_dummies(new_df, columns=['smoking_status'], drop_first=True)
+new_df.head()
+
+transfer categorical values to numbers
+
+ - label encoder and one-hot encoder(get_dummy)
+
+from sklearn.preprocessing import LabelEncoder
+
+#2. create the object
+le = LabelEncoder()
+
+#3. fit and transform
+df['status_en'] = le.fit_transform(df['Status'])
+df['status_en'].unique()
+
+le.inverse_transform(np.array([0, 1]))
+(X_test  = sc.transform(X_test))
+
+from sklearn.preprocessing import LabelEncoder
+
+le = LabelEncoder()
+df_train["Gender"] = le.fit_transform(df_train["Gender"])
+df_test["Gender"]  = le.transform(df_test["Gender"])
+
+Method 2
+data_train['Property_Area'].replace('Urban', 0, inplace = True)
+data_train['Property_Area'].replace('Semiurban', 1, inplace = True)
+data_train['Property_Area'].replace('Rural', 2, inplace = True)
+
+Splitting a comma seperated value column ito multiple columns
+
+df['B']  = 0
+df['S']  = 0
+df['C']  = 0
+df['L']  = 0
+df['V']  = 0
+df['Sa'] = 0
+df['S*'] = 0
+
+for index, row in enumerate(df.ingredients):
+    try:
+        some_list = row.split(',')
+    except:
+        some_list = []
+    for col in ['B', 'S', 'C', 'L', 'V', 'Sa', 'S*']:
+        if col in some_list:
+            df.loc[index, col] = 1
+
+df.drop(columns = ['ingredients'])
+
+
+Befor selecting X and y, balance data
+
+df['species'].value_counts()
+
+#1. Class Chinstrap
+species_chinstrap = df.loc[df['species'] == 'Chinstrap']
+print(species_chinstrap.shape)
+species_chinstrap.head()
+
+#2. Class Adelie
+species_adelie = df.loc[df['species'] == 'Adelie'].sample(n=68, random_state=999)
+print(species_adelie.shape)
+species_adelie.head()
+
+new_df = pd.concat([species_chinstrap, species_adelie])
+new_df['species'].value_counts()
+
+
+- Set the X and y
+X = new_df[  ['age', 
+        'hypertension', 
+        ]   ]
+
+y = new_df['stroke']
+
+X.shape, y.shape
+
+
+- Test train split
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
+                                                    random_state=999)
+
+X_train.shape, X_test.shape, y_train.shape, y_test.shape
+
+
+4. Clean data
+
+- Missing Values
+X_train.isna().sum()
+X_test.isna().sum()
+
+Continuous
+------------
+X_train['avg_glucose_level'].fillna(X_train['avg_glucose_level'].median(), inplace=True)
+
+#3. also fill the test set but with the training set, in case any empty
+X_test['avg_glucose_level'].fillna(X_train['avg_glucose_level'].median(), inplace=True)
+
+X_train['avg_glucose_level'].isna().sum()
+
+Discrete
+---------
+X_train['Bathroom'].fillna(2.0, inplace=True)
+
+- Standardize
+from sklearn.preprocessing import StandardScaler
+
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
+X_test[1:5]
+
+#Filling with mode
+
+df['col1'] = df['col1'].fillna(df['col1'].mode()[0])
+
+
+
+5. Modeling
+cross validation -> grid search
+this problem is a classification problem
+use RandomForestClassifer, SVC, LogisticRegression, GaussianNB
+5.1 Cross validation
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import GaussianNB
+
+from sklearn.model_selection import cross_val_score
+
+rf = RandomForestClassifier()
+sv = SVC()
+lr = LogisticRegression(max_iter=1000)
+gn = GaussianNB()
+
+models = [rf, sv, lr, gn]
+scores = []
+
+for model in models:
+    scores.append(cross_val_score(model, X_train, y_train, cv=5,
+                                  scoring='accuracy', ))
+    
+print(scores)
+
+
+print(np.mean(scores, axis=1))
+
+
+5.2 Grid search
+
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    'solver': ['newton-cg', 'lbfgs', 'liblinear'],
+}
+
+estimator = LogisticRegression(max_iter=1000)
+
+grid = GridSearchCV(estimator=estimator,
+                          param_grid=param_grid,
+                          cv = 5,
+                          refit=True,
+                          scoring='accuracy')
+
+grid.fit(X_train, y_train)
+
+grid.best_params_
+
+
+6. Testing
+.predict
+use from sklearn.metrics import accuracy
+use from sklearn.metrics import classification_report
+don't worry about what is recall, precision, f1
+i will explain later....
+
+from sklearn.metrics import accuracy_score, classification_report
+
+yhat = grid.predict(X_test)
+
+
+accuracy_score(y_test, yhat)
+
+print(classification_report(y_test, yhat))
+
+7. Feature importance
+
+Onehot encoding example at
+
+https://github.com/chaklam-silpasuwanchai/Python-for-Data-Science/blob/master/Lectures/02-Data%20Science/Sklearn/Logistic%20Regression%20using%20Sklearn/Case%20Study%20-%20Loan%20Prediction.ipynb
+
+Group By
+
+df = pd.DataFrame({'Animal': ['Falcon', 'Falcon',
+...                               'Parrot', 'Parrot'],
+...                    'Max Speed': [380., 370., 24., 26.]})
+
+>>> df.groupby(['Animal']).mean()
+        Max Speed
+Animal
+Falcon      375.0
+Parrot       25.0
